@@ -68,6 +68,16 @@ subroutine new_ompautoset(env,modus,maxjobs,parallel_jobs,cores_per_job)
   use crest_data
   use crest_parameters,only:wp
   implicit none
+#ifdef _WIN32
+  !> Never nested on Windows: MinGW's libgomp does not pool a nested team's threads, so every
+  !> OpenMP region inside a job (tblite has many) creates and ends Windows threads, each with
+  !> an OMP_STACKSIZE stack committed. A search whose stage has fewer jobs than threads spent
+  !> most of its time in thread creation (butane's extra MDs: 2-3 s each unnested, 24 s with
+  !> 2 nested threads, 2 min with 6). Unnested, the spare threads idle instead.
+  logical,parameter :: nesting_pays = .false.
+#else
+  logical,parameter :: nesting_pays = .true.
+#endif
   type(systemdata),intent(inout) :: env
   character(len=*),intent(in)    :: modus
   integer,intent(in)  :: maxjobs
@@ -95,7 +105,7 @@ subroutine new_ompautoset(env,modus,maxjobs,parallel_jobs,cores_per_job)
       cores_per_job = max(nint(Tfloor),1)
     end if
     if (index(modus,'_nested') .ne. 0 .and. cores_per_job > 1) then
-      if (env%omp_allow_nested) then
+      if (env%omp_allow_nested.and.nesting_pays) then
         !> We should never need more than two active nested layers
         call omp_set_max_active_levels(2)
       endif
@@ -125,7 +135,7 @@ subroutine new_ompautoset(env,modus,maxjobs,parallel_jobs,cores_per_job)
 
     !> the setting may also be used for linear-algebra focused runs, in which case 
     !> nested parallelism should be active
-    if (env%omp_allow_nested) then
+    if (env%omp_allow_nested.and.nesting_pays) then
       !> We should never need more than two active nested layers
       call omp_set_max_active_levels(2)
     endif
