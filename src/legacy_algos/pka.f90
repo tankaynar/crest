@@ -162,8 +162,8 @@ subroutine pkaquick(env,tim)
     end if
     if (env%relax.and.env%preopt) then      !--- optional conformational sampling
       call confscript2i(env,tim) !MTD-GC algo
-      call rename('crest_conformers.xyz','crest_pka_acid.xyz')
-      call rename('crest_best.xyz','acid.xyz')
+      call rename_file('crest_conformers.xyz','crest_pka_acid.xyz')
+      call rename_file('crest_best.xyz','acid.xyz')
       call V2cleanup(.false.)
     end if
     !---finally, update geometry in memory
@@ -208,7 +208,7 @@ subroutine pkaquick(env,tim)
     end if
     if (env%relax.and.env%preopt) then
       call relaxensemble('base.xyz',env,tim)
-      call rename('relax.base.xyz','crest_pka_base.xyz')
+      call rename_file('relax.base.xyz','crest_pka_base.xyz')
     end if
     !-- update geometry in memory
     call BASE%deallocate()
@@ -367,7 +367,7 @@ subroutine pka_miniopt(env,fname)
   call command(trim(jobcall), io)
   inquire (file='xtbopt.xyz',exist=ex)
   if (ex) then
-    call rename('xtbopt.xyz',fname)
+    call rename_file('xtbopt.xyz',fname)
   end if
   call remove('xtbrestart')
   call remove('xtbtopo.mol')

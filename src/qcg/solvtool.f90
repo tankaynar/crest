@@ -249,7 +249,7 @@ subroutine qcg_setup(env, solu, solv)
    end if
 
    if (env%use_xtbiff) then
-      call rename('xtblmoinfo', 'solute.lmo')
+      call rename_file('xtblmoinfo', 'solute.lmo')
    end if
 
    call chdir(thispath)
@@ -285,7 +285,7 @@ subroutine qcg_setup(env, solu, solv)
    end if
 
    if (env%use_xtbiff) then
-      call rename('xtblmoinfo', 'solvent.lmo')
+      call rename_file('xtblmoinfo', 'solvent.lmo')
    end if
 
    call chdir(thispath)
@@ -587,7 +587,7 @@ subroutine qcg_grow(env, solu, solv, clus, tim)
             if (.not. e_there) then
                write (*, '(1x,a)') 'Total Energy of cluster LMO computation not found'
             end if
-            call rename('xtblmoinfo', 'cluster.lmo')
+            call rename_file('xtblmoinfo', 'cluster.lmo')
          end if
       end if
 
@@ -801,7 +801,7 @@ subroutine qcg_grow(env, solu, solv, clus, tim)
    if (env%final_gfn2_opt) env%gfnver = '--gfn2'
    call opt_cluster(env, solu, clus, 'cluster.xyz', .true.)
    env%gfnver = gfnver_tmp
-   call rename('xtbopt.xyz', 'cluster_optimized.xyz')
+   call rename_file('xtbopt.xyz', 'cluster_optimized.xyz')
    call copysub('cluster_optimized.xyz', resultspath)
 
 !--- output and files
@@ -825,7 +825,7 @@ subroutine qcg_grow(env, solu, solv, clus, tim)
    call copysub('twopot_cavity.coord', resultspath)
    call copysub('cluster_cavity.coord', resultspath)
    call copysub('solute_cavity.coord', resultspath)
-!  call rename('xcontrol','wall_potential')
+!  call rename_file('xcontrol','wall_potential')
    env%constrain_solu = .false.
    call write_wall(env, solu%nat, solu%ell_abc, clus%ell_abc, 'wall_potential')
    call copysub('wall_potential', resultspath)
@@ -1198,7 +1198,7 @@ subroutine qcg_ensemble(env, solu, solv, clus, ens, tim, fname_results)
 
       end if
 
-      call rename('xtb.trj', 'crest_rotamers_0.xyz')
+      call rename_file('xtb.trj', 'crest_rotamers_0.xyz')
       call copysub('crest_rotamers_0.xyz', tmppath2)
       call dum%open('crest_rotamers_0.xyz')
 
@@ -1454,7 +1454,7 @@ subroutine qcg_ensemble(env, solu, solv, clus, ens, tim, fname_results)
    deallocate (e_clus)
 
 !---Folder management
-   call rename('cregen.out.tmp', 'thermo_data')
+   call rename_file('cregen.out.tmp', 'thermo_data')
    call copysub('thermo_data', resultspath)
    call copysub('crest_best.xyz', resultspath)
    call copysub('cre_members.out', resultspath)
@@ -1682,7 +1682,7 @@ subroutine qcg_cff(env, solu, solv, clus, ens, solv_ens, tim)
                if (.not. converged(i)) then
                   write (to, '("TMPCFF",i0)') i
                   call chdir(to)
-                  call rename('xtblmoinfo', 'solvent_cluster.lmo')
+                  call rename_file('xtblmoinfo', 'solvent_cluster.lmo')
                   call chdir(tmppath2)
                else
                   cycle

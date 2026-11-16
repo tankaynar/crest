@@ -32,13 +32,41 @@
 ! Basic subroutine for removing files or directories
 !-------------------------------------------------------------------------
 subroutine rmrf(dataname)
-  use iomod, only: command
+  use iomod, only: remove_tree
   implicit none
   character(len=*) :: dataname
-  integer :: io
-  call command('rm -rf '//trim(dataname)//' 2>/dev/null', io)
+  character(len=len_trim(dataname)) :: one
+  integer :: start,space
+  !> callers pass several names separated by spaces, as "rm -rf" takes them
+  start = 1
+  do while (start <= len_trim(dataname))
+    space = index(dataname(start:),' ')
+    if (space == 0) space = len_trim(dataname(start:))+1
+    one = dataname(start:start+space-2)
+    if (len_trim(one) > 0) call remove_tree(trim(one))
+    start = start+space
+  end do
   return
 end subroutine rmrf
+!-------------------------------------------------------------------------
+! Rename a file, replacing "to" if it exists, as POSIX rename() does.
+! Windows' rename() refuses an existing target, and CREST relies on
+! overwriting (it touches an output file, then renames the result onto it).
+!-------------------------------------------------------------------------
+subroutine rename_file(from,to)
+  implicit none
+  character(len=*) :: from,to
+  logical :: have_from,have_to
+  integer :: ich,io
+  if (trim(from) == trim(to)) return
+  inquire (file=trim(from),exist=have_from)
+  inquire (file=trim(to),exist=have_to)
+  if (have_from.and.have_to) then
+    open (newunit=ich,file=trim(to),iostat=io)
+    if (io == 0) close (ich,status='delete')
+  end if
+  call rename(trim(from),trim(to))
+end subroutine rename_file
 !-------------------------------------------------------------------------
 ! Basic subroutine for removing files or directories (with wild card ending)
 !-------------------------------------------------------------------------
@@ -109,9 +137,9 @@ subroutine V2cleanup(restartopt)
     call rmrf('cregen_*.tmp')
   else
     call rmrfw('NORMMD')
-    call rename(crefile//'_0.xyz','.tmp_full.xyz')
+    call rename_file(crefile//'_0.xyz','.tmp_full.xyz')
     call rmrfw(crefile)
-    call rename('.tmp_full.xyz',crefile//'_0.xyz')
+    call rename_file('.tmp_full.xyz',crefile//'_0.xyz')
   end if
   return
 end subroutine V2cleanup
@@ -142,7 +170,7 @@ subroutine V2terminating
   call remove('scoord.1')
   call catdel('cregen.out.tmp') !print to screen
   call checkname_xyz(crefile,inpnam,outnam)
-  call rename(inpnam,"crest_rotamers.xyz")
+  call rename_file(inpnam,"crest_rotamers.xyz")
   call rmrfw('crest_rotamers_')
   call rmrfw('crest_smtd_')
   return
@@ -270,12 +298,10 @@ subroutine cleanDFT(TMPCONF)
   character(len=:),allocatable :: pipe
   character(len=10) :: nmmr
   integer :: i,io
-  pipe = ' 2>/dev/null'
   do i = 1,TMPCONF
     write (nmmr,'(i0)') i
-    str = 'cd TMPCONF'//trim(nmmr)//' && rm -rf '
-    call command(str//'mos'//pipe, io)
-    call command(str//'dh'//pipe, io)
+    call rmrf('TMPCONF'//trim(nmmr)//'/mos')
+    call rmrf('TMPCONF'//trim(nmmr)//'/dh')
   end do
   return
 end subroutine cleanDFT

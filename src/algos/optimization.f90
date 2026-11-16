@@ -310,7 +310,7 @@ subroutine crest_ensemble_screening(env,tim)
   call catdel('cregen.out.tmp')
   write (stdout,'(/,1x,a,1x,a)') 'Final ensemble on file','<'//trim(ensemblefile)//'>'
 
-  call rename(conformerfile,trim(ensemblefile))
+  call rename_file(conformerfile,trim(ensemblefile))
 
 !>--- clean up
   call screen_cleanup

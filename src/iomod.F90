@@ -25,6 +25,23 @@ module iomod
   implicit none
   public
 
+#ifdef _WIN32
+  interface
+    function c_mkdir_win(path) bind(c,name="_mkdir")
+      use iso_c_binding
+      integer(c_int) :: c_mkdir_win
+      character(kind=c_char,len=1) :: path(*)
+    end function c_mkdir_win
+  end interface
+
+  interface
+    integer(kind=c_int) function c_setenv(c_name,c_VALUE) bind(c,name="_putenv_s")
+      use iso_c_binding
+      character(kind=c_char)   :: c_name(*)
+      character(kind=c_char)   :: c_VALUE(*)
+    end function
+  end interface
+#else
   interface
     function mkdir(path,mode) bind(c,name="mkdir")
       use iso_c_binding
@@ -41,12 +58,14 @@ module iomod
       character(kind=c_char)   :: c_VALUE(*)
     end function
   end interface
+#endif
   interface setenv
     module procedure setenv_string
     module procedure setenv_int
     module procedure setenv_float
   end interface setenv
 
+#ifndef _WIN32
   interface
     integer(kind=c_int) function c_symlink(c_from,c_to) bind(c,name="symlink")
       use iso_c_binding
@@ -54,6 +73,7 @@ module iomod
       character(kind=c_char)   :: c_to(*)
     end function
   end interface
+#endif
 
   interface wrshort
     module procedure wrshort_real
@@ -96,8 +116,18 @@ module iomod
     module procedure to_str_bool
   end interface to_str
 
+#ifdef _WIN32
+  character(len=*),parameter :: null_device = 'NUL'
+  character(len=*),parameter :: which_call = 'where '
+#else
+  character(len=*),parameter :: null_device = '/dev/null'
+  character(len=*),parameter :: which_call = 'command -v '
+#endif
+
   public :: checkprog
   public :: checkprog_silent
+  public :: remove_tree
+  public :: kill_process
   private :: getpath
 
 !========================================================================================!
@@ -312,7 +342,11 @@ contains !> MODULE PROCEDURES START HERE
     implicit none
     integer :: makedir
     character(len=*) :: str
+#ifdef _WIN32
+    makedir = c_mkdir_win(str//char(0)) !create new directory
+#else
     makedir = mkdir(str//char(0),int(o'770',c_int16_t)) !create new directory
+#endif
     return
   end function makedir
 
@@ -356,7 +390,12 @@ contains !> MODULE PROCEDURES START HERE
     integer :: sylnk
     character(len=*) :: path1
     character(len=*) :: path2
+#ifdef _WIN32
+    call copy(trim(path1),trim(path2))
+    sylnk = 0
+#else
     sylnk = c_symlink(trim(path1)//c_null_char,trim(path2)//c_null_char) !create new directory
+#endif
     return
   end function sylnk
 
@@ -930,13 +969,13 @@ contains !> MODULE PROCEDURES START HERE
     character(len=:),allocatable :: pipe
     integer :: rcode,ich,io
 
-    pipe = ' >/dev/null 2>/dev/null'
+    pipe = ' >'//null_device//' 2>'//null_device
 
-    checkcall = 'command -v '//trim(fname)//pipe
+    checkcall = which_call//trim(fname)//pipe
     call command(checkcall,rcode)
 
     if (rcode .eq. 0) then
-      checkcall = 'command -v '//trim(fname)//' > pathout.tmp 2>/dev/null'
+      checkcall = which_call//trim(fname)//' > pathout.tmp 2>'//null_device
       call command(checkcall,io)
       open (newunit=ich,file='pathout.tmp')
       read (ich,'(a)') path
@@ -953,9 +992,9 @@ contains !> MODULE PROCEDURES START HERE
     integer :: rcode,r
     character(len=512) :: path
 
-    pipe = ' >/dev/null 2>/dev/null'
+    pipe = ' >'//null_device//' 2>'//null_device
 
-    checkcall = 'command -v '//trim(fname)//pipe
+    checkcall = which_call//trim(fname)//pipe
     call command(checkcall,rcode)
 
     write (stdout,'(4x,a,a,a)') 'binary: "',trim(fname),'"'
@@ -981,8 +1020,8 @@ contains !> MODULE PROCEDURES START HERE
     character(len=:),allocatable :: pipe
     integer :: io
 
-    pipe = ' >/dev/null 2>/dev/null'
-    checkcall = 'command -v '//trim(fname)//pipe
+    pipe = ' >'//null_device//' 2>'//null_device
+    checkcall = which_call//trim(fname)//pipe
     call command(trim(checkcall),exitstat=io)
 
     if (present(verbose)) then
@@ -1021,6 +1060,42 @@ contains !> MODULE PROCEDURES START HERE
 #endif
     if (present(exitstat)) exitstat = io
   end subroutine command
+
+!> Remove files or directories matching "pattern" (a trailing '*' is allowed).
+!> cmd.exe has no "rm -rf": del removes the files, and rmdir, run for each matching
+!> directory, removes the trees.
+  subroutine remove_tree(pattern)
+    implicit none
+    character(len=*),intent(in) :: pattern
+    integer :: io
+#ifdef _WIN32
+    character(len=:),allocatable :: winpat
+    integer :: k
+    winpat = trim(pattern)
+    do k = 1,len(winpat)
+      if (winpat(k:k) == '/') winpat(k:k) = char(92)
+    end do
+    call command('del /f /q "'//winpat//'" >NUL 2>NUL',io)
+    call command('for /d %D in ("'//winpat//'") do @rmdir /s /q "%D" >NUL 2>NUL',io)
+#else
+    call command('rm -rf '//trim(pattern)//' 2>/dev/null',io)
+#endif
+  end subroutine remove_tree
+
+!> Stop process "pid" (signal 9 on POSIX). MinGW's libgfortran has no "kill" extension,
+!> so Windows asks taskkill.
+  subroutine kill_process(pid,io)
+    implicit none
+    integer,intent(in) :: pid
+    integer,intent(out) :: io
+#ifdef _WIN32
+    character(len=20) :: pidstr
+    write (pidstr,'(i0)') pid
+    call command('taskkill /F /T /PID '//trim(pidstr)//' >NUL 2>NUL',io)
+#else
+    call kill(pid,9,io)
+#endif
+  end subroutine kill_process
 
 !========================================================================================!
 !========================================================================================!

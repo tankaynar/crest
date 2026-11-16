@@ -94,14 +94,14 @@ subroutine tautomerize_legacy(env,tim)
     inquire (file='coordprot.0',exist=ex)
     if (.not.ex) return
     call checkname_xyz('tautomerize',inpnam,outnam)
-    call rename('protonated.xyz',outnam)
+    call rename_file('protonated.xyz',outnam)
 !--- do Deprotonation
     write (dummy,'(a,i0,a,i0)') 'D E P R O T O N A T I O N   C Y C L E     ', &
     & 1,' of ',taut%iter+1
     call largehead(trim(dummy))
     call checkname_xyz('tautomerize',inpnam,outnam)
     call deprotens(inpnam,env,taut,tim)
-    call rename('deprotonated.xyz',outnam)
+    call rename_file('deprotonated.xyz',outnam)
   else
     !-- for the reversed deprotonation/protonation mode we can use the iteration loop
     !   below instead, but we have to set up some minor things
@@ -121,7 +121,7 @@ subroutine tautomerize_legacy(env,tim)
       call largehead(trim(dummy))
       call checkname_xyz('tautomerize',inpnam,outnam)
       call protens(inpnam,env,taut,tim)
-      call rename('protonated.xyz',outnam)
+      call rename_file('protonated.xyz',outnam)
       !--- do Deprotonation
       write (dummy,'(a,i0,a,i0)') 'D E P R O T O N A T I O N   C Y C L E     ', &
       & i+1,' of ',taut%iter+1
@@ -129,7 +129,7 @@ subroutine tautomerize_legacy(env,tim)
 
       call checkname_xyz('tautomerize',inpnam,outnam)
       call deprotens(inpnam,env,taut,tim)
-      call rename('deprotonated.xyz',outnam)
+      call rename_file('deprotonated.xyz',outnam)
     else
       !--- do Deprotonation
       write (dummy,'(a,i0,a,i0)') 'D E P R O T O N A T I O N   C Y C L E     ', &
@@ -138,14 +138,14 @@ subroutine tautomerize_legacy(env,tim)
 
       call checkname_xyz('tautomerize',inpnam,outnam)
       call deprotens(inpnam,env,taut,tim)
-      call rename('deprotonated.xyz',outnam)
+      call rename_file('deprotonated.xyz',outnam)
       !--- do Protonation
       write (dummy,'(a,i0,a,i0)') 'P R O T O N A T I O N   C Y C L E     ', &
       & i,' of ',taut%iter
       call largehead(trim(dummy))
       call checkname_xyz('tautomerize',inpnam,outnam)
       call protens(inpnam,env,taut,tim)
-      call rename('protonated.xyz',outnam)
+      call rename_file('protonated.xyz',outnam)
     end if
   end do
 
@@ -178,7 +178,7 @@ subroutine tautomerize_legacy(env,tim)
   call checkname_xyz('tautomerize',inpnam,outnam)
   call MDopt_para(env,inpnam,0)
   filename = trim(thispath)//'/'//trim(outnam)
-  call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+  call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
   call rmrf('OPTIM')
   call sort_ens(taut,outnam,.false.)
   call remaining_in(outnam,taut%ewin,nallout) !--- remaining number of structures
@@ -263,7 +263,7 @@ subroutine protsmall(env,prot,tim)
   call checkname_xyz('protonate',inpnam,outnam)
   call MDopt_para(env,protname,1)
   filename = trim(thispath)//'/'//trim(outnam)
-  call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+  call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
   call rmrf('OPTIM')
   prot%ewin = prot%ewin*2.0d0
   call sort_ens(prot,outnam,.false.)
@@ -274,7 +274,7 @@ subroutine protsmall(env,prot,tim)
   call checkname_xyz('protonate',inpnam,outnam)
   call MDopt_para(env,inpnam,2)
   filename = trim(thispath)//'/'//trim(outnam)
-  call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+  call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
   call rmrf('OPTIM')
   prot%ewin = prot%ewin/2.0d0
   call sort_ens(prot,outnam,.false.)
@@ -371,7 +371,7 @@ subroutine deprotens(ens,env,prot,tim)
   call checkname_xyz('deprotonate',inpnam,outnam)
   call MDopt_para(env,protname,1)
   filename = trim(thispath)//'/'//trim(outnam)
-  call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+  call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
   call rmrf('OPTIM')
   prot%ewin = prot%ewin*2.0d0
   call sort_ens(prot,outnam,.false.)
@@ -382,7 +382,7 @@ subroutine deprotens(ens,env,prot,tim)
   call checkname_xyz('deprotonate',inpnam,outnam)
   call MDopt_para(env,inpnam,2)
   filename = trim(thispath)//'/'//trim(outnam)
-  call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+  call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
   call rmrf('OPTIM')
   prot%ewin = prot%ewin/2.0d0
   call sort_ens(prot,outnam,.false.)
@@ -546,7 +546,7 @@ subroutine protens(ens,env,prot,tim)
   call checkname_xyz('protonate',inpnam,outnam)
   call MDopt_para(env,'protomers.xyz',1)
   filename = trim(tmppath)//'/'//trim(outnam)
-  call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+  call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
   call rmrf('OPTIM')
   prot%ewin = prot%ewin*2.0d0
   call sort_ens(prot,outnam,.false.)
@@ -557,7 +557,7 @@ subroutine protens(ens,env,prot,tim)
   call checkname_xyz('protonate',inpnam,outnam)
   call MDopt_para(env,inpnam,2)
   filename = trim(tmppath)//'/'//trim(outnam)
-  call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+  call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
   call rmrf('OPTIM')
   prot%ewin = prot%ewin/2.0d0
   call sort_ens(prot,outnam,.false.)
@@ -573,7 +573,7 @@ subroutine protens(ens,env,prot,tim)
 !--- change back to original dir and copy the file with optimized protomers
   call chdir(thispath)
   jobcall = trim(tmppath)//'/'//'protonated.xyz' 
-  call rename(trim(jobcall),'protonated.xyz')
+  call rename_file(trim(jobcall),'protonated.xyz')
   call rmrf(dirn)
   return
 end subroutine protens
@@ -771,18 +771,18 @@ subroutine tautomerize_ext(ensemb,env,tim)
       inquire (file='coordprot.0',exist=ex)
       if (.not.ex) return
       call checkname_xyz('tautomerize',inpnam,outnam)
-      call rename('protonated.xyz',outnam)
+      call rename_file('protonated.xyz',outnam)
 !--- do Deprotonation
       write (dummy,'(a,i0,a,i0)') 'D E P R O T O N A T I O N   C Y C L E     ', &
       & 1,' of ',taut%iter+1
       call largehead(trim(dummy))
       call checkname_xyz('tautomerize',inpnam,outnam)
       call deprotens(inpnam,env,taut,tim)
-      call rename('deprotonated.xyz',outnam)
+      call rename_file('deprotonated.xyz',outnam)
 !--- Relax structures by performing a small conformational search
       env%nat = natp
       call relaxensemble(outnam,env,tim)
-      call rename('relax.'//outnam,outnam)
+      call rename_file('relax.'//outnam,outnam)
     else
       !-- for the reversed deprotonation/protonation mode we can use the iteration loop
       !   below instead, but we have to set up some minor things
@@ -802,7 +802,7 @@ subroutine tautomerize_ext(ensemb,env,tim)
         call largehead(trim(dummy))
         call checkname_xyz('tautomerize',inpnam,outnam)
         call protens(inpnam,env,taut,tim)
-        call rename('protonated.xyz',outnam)
+        call rename_file('protonated.xyz',outnam)
         !--- do Deprotonation
         write (dummy,'(a,i0,a,i0)') 'D E P R O T O N A T I O N   C Y C L E     ', &
         & i+1,' of ',taut%iter+1
@@ -810,7 +810,7 @@ subroutine tautomerize_ext(ensemb,env,tim)
 
         call checkname_xyz('tautomerize',inpnam,outnam)
         call deprotens(inpnam,env,taut,tim)
-        call rename('deprotonated.xyz',outnam)
+        call rename_file('deprotonated.xyz',outnam)
       else
         !--- do Deprotonation
         write (dummy,'(a,i0,a,i0)') 'D E P R O T O N A T I O N   C Y C L E     ', &
@@ -819,19 +819,19 @@ subroutine tautomerize_ext(ensemb,env,tim)
 
         call checkname_xyz('tautomerize',inpnam,outnam)
         call deprotens(inpnam,env,taut,tim)
-        call rename('deprotonated.xyz',outnam)
+        call rename_file('deprotonated.xyz',outnam)
         !--- do Protonation
         write (dummy,'(a,i0,a,i0)') 'P R O T O N A T I O N   C Y C L E     ', &
         & i,' of ',taut%iter
         call largehead(trim(dummy))
         call checkname_xyz('tautomerize',inpnam,outnam)
         call protens(inpnam,env,taut,tim)
-        call rename('protonated.xyz',outnam)
+        call rename_file('protonated.xyz',outnam)
       end if
 !--- relax structures after each cycle
       env%nat = natp
       call relaxensemble(outnam,env,tim)
-      call rename('relax.'//outnam,outnam)
+      call rename_file('relax.'//outnam,outnam)
     end do
 
 !--- clean all temporary ensemble files
@@ -865,11 +865,11 @@ subroutine tautomerize_ext(ensemb,env,tim)
   call smallhead('Final Geometry Optimization')
   call checkname_xyz('tautomerize',inpnam,outnam)
 
-  call rename('collected.xyz',inpnam)
+  call rename_file('collected.xyz',inpnam)
 
   call MDopt_para(env,inpnam,0)
   filename = trim(thispath)//'/'//trim(outnam)
-  call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+  call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
   call rmrf('OPTIM')
   call sort_ens(taut,outnam,.false.)
   call remaining_in(outnam,taut%ewin,nallout) !--- remaining number of structures

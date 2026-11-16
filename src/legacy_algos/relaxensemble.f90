@@ -124,7 +124,7 @@ subroutine relaxensemble(fname,env,tim)
       call newcregen(env,6)
       env%confgo = .false.
       env%ensemblename='none selected'  !RESET, IMPORTANT!
-      call rename(trim(oname)//'.sorted',trim(oname))
+      call rename_file(trim(oname)//'.sorted',trim(oname))
 
 
       return

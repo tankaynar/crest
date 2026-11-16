@@ -98,7 +98,7 @@ subroutine sort_constrain_file(fname)
   deallocate (entire,setsave)
   close (ich,status='delete')
   close (och)
-  call rename('.tmpconstrains',fname)
+  call rename_file('.tmpconstrains',fname)
 end subroutine sort_constrain_file
 
 !-----------------------------------------------------------------------------

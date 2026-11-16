@@ -208,7 +208,7 @@ subroutine xtbopt_legacy(env)
 !>--- process the optimization status
   call trialOPT_warning(env,mol,fin)
   call mol%deallocate()
-  call rename('xtbopt.coord','coord')
+  call rename_file('xtbopt.coord','coord')
 
 !>---- cleanup
   call remove(fname)
@@ -576,7 +576,7 @@ subroutine multilevel_opt(env,modus)
     call checkname_xyz(crefile,inpnam,outnam)
     call MDopt_para(env,trim(inpnam),modus)
     filename = trim(thispath)//'/'//trim(outnam)
-    call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+    call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
     !---using cregen to sort the optimized structures
     call checkname_xyz(crefile,inpnam,outnam)
     !--- get other thresholds
@@ -586,7 +586,7 @@ subroutine multilevel_opt(env,modus)
     call sort_and_check(env,trim(filename))
     !--- only if modus=1 the input file is overwritten with the sorted file
     call remove(inpnam)
-    call rename(outnam,inpnam)
+    call rename_file(outnam,inpnam)
     !-----
     call rmoptim()
     write (*,*)
@@ -601,7 +601,7 @@ subroutine multilevel_opt(env,modus)
       call MDopt_para(env,trim(inpnam),1)
     end if
     filename = trim(thispath)//'/'//trim(outnam)
-    call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+    call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
     !--- get other thresholds
     newthr = aint(ewinbackup*(10.0d0/6.0d0))
     env%ewin = newthr   !
@@ -614,7 +614,7 @@ subroutine multilevel_opt(env,modus)
     call checkname_xyz(crefile,inpnam,outnam)
     call MDopt_para(env,trim(inpnam),0) !optlev is set from the module variable
     filename = trim(thispath)//'/'//trim(outnam)
-    call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+    call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
     call sort_and_check(env,trim(filename))
     call rmoptim()
     write (*,*)
@@ -624,7 +624,7 @@ subroutine multilevel_opt(env,modus)
     call checkname_xyz(crefile,inpnam,outnam)
     call MDopt_para(env,trim(inpnam),1)
     filename = trim(thispath)//'/'//trim(outnam)
-    call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+    call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
     !---using cregen to sort the optimized structures
     call checkname_xyz(crefile,inpnam,outnam)
     !--- get other thresholds
@@ -634,7 +634,7 @@ subroutine multilevel_opt(env,modus)
     call sort_and_check(env,trim(filename))
     !--- only if modus=1 the input file is overwritten with the sorted file
     call remove(inpnam)
-    call rename(outnam,inpnam)
+    call rename_file(outnam,inpnam)
     !-----
     call rmoptim()
     write (*,*)
@@ -648,7 +648,7 @@ subroutine multilevel_opt(env,modus)
     call checkname_xyz(crefile,inpnam,outnam)
     call MDopt_para(env,trim(inpnam),4) !optlev is set from the module variable
     filename = trim(thispath)//'/'//trim(outnam)
-    call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+    call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
     call sort_and_check(env,trim(filename))
     call rmoptim()
     write (*,*)
@@ -661,7 +661,7 @@ subroutine multilevel_opt(env,modus)
     call checkname_xyz(crefile,inpnam,outnam)
     call MDopt_para(env,trim(inpnam),0) !optlev is set from the module variable
     filename = trim(thispath)//'/'//trim(outnam)
-    call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+    call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
 !        if (env%crestver .ne. crest_solv) then
     if (.not.env%QCG) then
       call sort_and_check(env,trim(filename))
@@ -811,7 +811,7 @@ subroutine setMetadyn2(fname,fac,expo,dumplist)
   close (ich2)
   close (ich)
   deallocate (mdyn)
-  call rename('tmpcoordfile',fname)
+  call rename_file('tmpcoordfile',fname)
   return
 end subroutine setMetadyn2
 
@@ -866,7 +866,7 @@ subroutine cross3(env)
     !>-- optional multilevel opt
     if (env%gcmultiopt) then
       call checkname_xyz('confcross',inpnam,outnam)
-      call rename('OPTIM'//'/'//'opt.xyz',trim(inpnam))
+      call rename_file('OPTIM'//'/'//'opt.xyz',trim(inpnam))
       env%ewin = aint(ewinbackup*(10.0d0/6.0d0))
       call newcregen(env,15)
       call checkname_xyz('confcross',inpnam,outnam)
@@ -980,7 +980,7 @@ subroutine append_INPUT_to(fnam,newtag)
 
   call appendto(inam,tmpnam)
   call remove(inam)
-  call rename(tmpnam,inam)
+  call rename_file(tmpnam,inam)
   return
 end subroutine append_INPUT_to
 
@@ -1233,7 +1233,7 @@ subroutine emtdcopy(env,iter,stopiter,broken)
   if (iter == 0) then
     call checkname_xyz(crefile,atmp,crename)
     write (btmp,'(a,i0,a)') filname,iter,'.xyz'
-    call rename(trim(atmp),trim(btmp))
+    call rename_file(trim(atmp),trim(btmp))
     call rmrfw('crest_rotamers_')
     call rmrfw('.data')
     env%emtd%sapproxlast = env%emtd%sapprox
@@ -1269,7 +1269,7 @@ subroutine emtdcopy(env,iter,stopiter,broken)
   if (.not.broken) then
     call checkname_xyz(crefile,crename,btmp)
     write (btmp,'(a,i0,a)') filname,iter,'.xyz'
-    call rename(trim(crename),trim(btmp))
+    call rename_file(trim(crename),trim(btmp))
   end if
 
   call rdensembleparam(conformerfile,i,nall)
@@ -1402,7 +1402,7 @@ subroutine XHorient(env,infile)
     call smallhead('Additional orientation sampling')
     call MDopt_para(env,newfile,0)
     !---- printout and copy
-    call rename('OPTIM'//'/'//'opt.xyz',trim(newfile))
+    call rename_file('OPTIM'//'/'//'opt.xyz',trim(newfile))
     call rmrf('OPTIM')
   else
     call remove(newfile)

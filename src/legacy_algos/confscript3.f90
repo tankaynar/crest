@@ -82,7 +82,7 @@ subroutine mdopt_legacy(env,tim)
     call MDopt_para(env,trim(tmpname),0)
 
 !---- printout and copy
-    call rename('OPTIM'//'/'//'opt.xyz',trim(newname))
+    call rename_file('OPTIM'//'/'//'opt.xyz',trim(newname))
     write (*,'(1x,a,1x,a)') 'Optimized ensemble on file','<'//trim(newname)//'>'
 !---- clean up
     call rmrf('OPTIM')
@@ -234,7 +234,7 @@ subroutine screen_legacy(env,tim)
   call checkname_xyz(crefile,inpnam,outnam)
   call MDopt_para(env,trim(tmpname),1)
   filename = trim(thispath)//'/'//trim(outnam)
-  call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+  call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
   env%ewin = ewinbackup*4.0d0
   env%rthr = rthrbackup*2.0d0
   !---using cregen to sort the optimized structures
@@ -242,7 +242,7 @@ subroutine screen_legacy(env,tim)
   call confg_chk3(env)
   !--- only in the first ste  the input file is overwritten with the sorted file
   call remove(inpnam)
-  call rename(outnam,inpnam)
+  call rename_file(outnam,inpnam)
   !-----
   call remaining_in(trim(inpnam),env%ewin,nremain)
   env%ewin = ewinbackup
@@ -254,7 +254,7 @@ subroutine screen_legacy(env,tim)
   call checkname_xyz(crefile,inpnam,outnam)
   call MDopt_para(env,trim(inpnam),2)
   filename = trim(thispath)//'/'//trim(outnam)
-  call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+  call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
   env%ewin = ewinbackup*2.0d0
   call confg_chk3(env)
   call remaining_in(trim(inpnam),env%ewin,nremain)
@@ -266,7 +266,7 @@ subroutine screen_legacy(env,tim)
   call checkname_xyz(crefile,inpnam,outnam)
   call MDopt_para(env,trim(inpnam),0)
   filename = trim(thispath)//'/'//trim(outnam)
-  call rename('OPTIM'//'/'//'opt.xyz',trim(filename))
+  call rename_file('OPTIM'//'/'//'opt.xyz',trim(filename))
   call confg_chk3(env)
   call checkname_xyz(crefile,inpnam,outnam)
   call remaining_in(trim(inpnam),env%ewin,nremain)
@@ -278,7 +278,7 @@ subroutine screen_legacy(env,tim)
   write (*,*)
   write (*,'(1x,a,1x,a)') 'Final ensemble on file','<'//trim(newname)//'>'
 
-  call rename(conformerfile,trim(newname))
+  call rename_file(conformerfile,trim(newname))
 
 !---- clean up
   call screen_cleanup

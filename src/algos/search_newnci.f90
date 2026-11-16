@@ -135,10 +135,10 @@ subroutine crest_search_newnci(env,tim)
 !>--- save the CRE under a backup name
       call checkname_xyz(crefile,atmp,str)
       call checkname_xyz('.cre',str,btmp)
-      call rename(atmp,btmp)
+      call rename_file(atmp,btmp)
 !>--- save cregen output
       call checkname_tmp('cregen',atmp,btmp)
-      call rename('cregen.out.tmp',btmp)
+      call rename_file('cregen.out.tmp',btmp)
 
 !=========================================================!
 !>--- cleanup after first iteration and prepare next

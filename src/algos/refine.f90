@@ -60,7 +60,7 @@ subroutine crest_refine(env,input,output)
 !>--- presorting step, if necessary
   if(env%refine_presort)then
     call newcregen(env,0,input)
-    call rename('crest_ensemble.xyz',input)
+    call rename_file('crest_ensemble.xyz',input)
   endif
 
 !>--- read in

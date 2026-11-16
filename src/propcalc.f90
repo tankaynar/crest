@@ -333,7 +333,7 @@ subroutine propcalc(iname,imode,env,tim)
 
     call newcregen(env,0)
 
-    call rename('crest_property.xyz.sorted', &
+    call rename_file('crest_property.xyz.sorted', &
     & trim(thispath)//'/crest_property.xyz')
     call remove(env%ensemblename)
 !------ IR averaging
@@ -353,7 +353,7 @@ subroutine propcalc(iname,imode,env,tim)
 
     call newcregen(env,0)
 
-    call rename('crest_ensemble.xyz', &
+    call rename_file('crest_ensemble.xyz', &
     & trim(thispath)//'/crest_conformers.xyz')
   case (50:59)
     call rdpropens(TMPCONF,nat,xyz) !get updated geometries
@@ -370,7 +370,7 @@ subroutine propcalc(iname,imode,env,tim)
       call wrxyz(ich,nat,at,xyz(:,:,i),trim(str))
     end do
     close (ich)
-    call rename(env%ensemblename,trim(thispath)//'/'//env%ensemblename)
+    call rename_file(env%ensemblename,trim(thispath)//'/'//env%ensemblename)
     call chdir(thispath)
     if (imode .lt. 59) then !TODO temporary skip for some testing
       env%confgo = .true.
@@ -378,7 +378,7 @@ subroutine propcalc(iname,imode,env,tim)
       call newcregen(env,0)
 
       env%confgo = .false.
-      call rename(trim(env%ensemblename)//'.sorted', &
+      call rename_file(trim(env%ensemblename)//'.sorted', &
       & env%ensemblename)
     end if
 
@@ -401,7 +401,7 @@ subroutine propcalc(iname,imode,env,tim)
     close (ich)
     close (ich2)
 
-    call rename('crest.dipoles', &
+    call rename_file('crest.dipoles', &
     & trim(thispath)//'/'//'crest.dipoles')
 
     write (*,*)
@@ -421,10 +421,10 @@ subroutine propcalc(iname,imode,env,tim)
 
     call newcregen(env,0)
 
-    call rename('crest_property.xyz.sorted', &
+    call rename_file('crest_property.xyz.sorted', &
     & trim(thispath)//'/crest_property.xyz')
     call remove(env%ensemblename)
-    call rename('crest_ensemble.xyz', &
+    call rename_file('crest_ensemble.xyz', &
     & trim(thispath)//'/crest_ensemble.xyz')
 
   case default
@@ -441,19 +441,19 @@ subroutine propcalc(iname,imode,env,tim)
 
   inquire (file='crest.vibspectrum',exist=ex)
   if (ex) then
-    call rename('crest.vibspectrum', &
+    call rename_file('crest.vibspectrum', &
     & trim(thispath)//'/'//'crest.vibspectrum')
   end if
 
   inquire (file='crest_property.xyz',exist=ex)
   if (ex) then
-    call rename('crest_property.xyz', &
+    call rename_file('crest_property.xyz', &
     & trim(thispath)//'/'//'crest_property.xyz')
   end if
 
   inquire (file='crest_populated.xyz',exist=ex)
   if (ex) then
-    call rename('crest_populated.xyz', &
+    call rename_file('crest_populated.xyz', &
     & trim(thispath)//'/'//'crest_populated.xyz')
   end if
 

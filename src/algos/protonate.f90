@@ -226,7 +226,7 @@ subroutine crest_new_protonate(env,tim)
     write (stdout,'(a)') '> Sorting structures by energy to remove failed opts. ...'
     env%ewin = 1000.0_wp
     call newcregen(env,7,trim(atmp))
-    call rename(trim(atmp)//'.sorted',trim(atmp))
+    call rename_file(trim(atmp)//'.sorted',trim(atmp))
     write (stdout,'(a)') '> Sorted file was renamed to '//trim(atmp)
     write (stdout,'(a)') '> WARNING: These are force-field energies which are '
     write (stdout,'(a)') '           NOT(!) accurate for bond formation and breaking!'
@@ -280,7 +280,7 @@ subroutine crest_new_protonate(env,tim)
     write (stdout,'(a)') '> Sorting structures by energy to remove failed opts. ...'
     env%ewin = env%protb%ewin*5.0_wp  !> large energy threshold
     call newcregen(env,7,trim(atmp))
-    call rename(trim(atmp)//'.sorted',trim(atmp))
+    call rename_file(trim(atmp)//'.sorted',trim(atmp))
     write (stdout,'(a)') '> Sorted file was renamed to '//trim(atmp)
     write (stdout,*)
 
@@ -318,7 +318,7 @@ subroutine crest_new_protonate(env,tim)
     write (stdout,'(a)') '> Sorting structures by energy ...'
     env%ewin = env%protb%ewin*3.0_wp
     call newcregen(env,7,trim(atmp))
-    call rename(trim(atmp)//'.sorted',trim(atmp))
+    call rename_file(trim(atmp)//'.sorted',trim(atmp))
   end if
 
 !========================================================================================!
@@ -327,7 +327,7 @@ subroutine crest_new_protonate(env,tim)
 
 !========================================================================================!
 !>--- move final ensemble to protonated.xyz
-  call rename(trim(atmp),'protonated.xyz')
+  call rename_file(trim(atmp),'protonated.xyz')
   write (stdout,'(a)') '> Sorted file was renamed to protonated.xyz'
 
   write (stdout,'(a)') '> All other temporary protonate_*.xyz files are removed by default.'
@@ -539,7 +539,7 @@ subroutine protonation_prep_canonical(env,refmol,fname)
 !>--- "sort" again for printout
   call newcregen(env,7,trim(outfile))
   call remove(outfile)
-  call rename(outfile//'.sorted',fname)
+  call rename_file(outfile//'.sorted',fname)
 
   deallocate (group)
   deallocate (canon)
@@ -710,7 +710,7 @@ subroutine crest_new_deprotonate(env,tim)
     write (stdout,'(a)') '> Sorting structures by energy to remove failed opts. ...'
     env%ewin = 1000.0_wp
     call newcregen(env,7,trim(atmp))
-    call rename(trim(atmp)//'.sorted',trim(atmp))
+    call rename_file(trim(atmp)//'.sorted',trim(atmp))
     write (stdout,'(a)') '> Sorted file was renamed to '//trim(atmp)
     write (stdout,'(a)') '> WARNING: These are force-field energies which are '
     write (stdout,'(a)') '           NOT(!) accurate for bond formation and breaking!'
@@ -764,7 +764,7 @@ subroutine crest_new_deprotonate(env,tim)
     write (stdout,'(a)') '> Sorting structures by energy to remove failed opts. ...'
     env%ewin = env%protb%ewin*5.0_wp  !> large energy threshold
     call newcregen(env,7,trim(atmp))
-    call rename(trim(atmp)//'.sorted',trim(atmp))
+    call rename_file(trim(atmp)//'.sorted',trim(atmp))
     write (stdout,'(a)') '> Sorted file was renamed to '//trim(atmp)
     write (stdout,*)
 
@@ -801,7 +801,7 @@ subroutine crest_new_deprotonate(env,tim)
     write (stdout,'(a)') '> Sorting structures by energy ...'
     env%ewin = env%protb%ewin*3.0_wp
     call newcregen(env,7,trim(atmp))
-    call rename(trim(atmp)//'.sorted',trim(atmp))
+    call rename_file(trim(atmp)//'.sorted',trim(atmp))
   end if
 
 !========================================================================================!
@@ -810,7 +810,7 @@ subroutine crest_new_deprotonate(env,tim)
 
 !========================================================================================!
 !>--- move final ensemble to deprotonated.xyz
-  call rename(trim(atmp),'deprotonated.xyz')
+  call rename_file(trim(atmp),'deprotonated.xyz')
   write (stdout,'(a)') '> Sorted file was renamed to deprotonated.xyz'
 
   write (stdout,'(a)') '> All other temporary deprotonate_*.xyz files are removed by default.'
@@ -1192,7 +1192,7 @@ subroutine crest_new_tautomerize(env,tim)
     write (stdout,'(a)') '> Sorting structures by energy to remove failed opts. ...'
     env%ewin = 1000.0_wp
     call newcregen(env,7,trim(atmp))
-    call rename(trim(atmp)//'.sorted',trim(atmp))
+    call rename_file(trim(atmp)//'.sorted',trim(atmp))
     write (stdout,'(a)') '> Sorted file was renamed to '//trim(atmp)
     write (stdout,'(a)') '> WARNING: These are force-field energies which are '
     write (stdout,'(a)') '           NOT(!) accurate for bond formation and breaking!'
@@ -1249,7 +1249,7 @@ subroutine crest_new_tautomerize(env,tim)
     write (stdout,'(a)') '> Sorting structures by energy to remove failed opts. ...'
     env%ewin = env%protb%ewin*3.0_wp  !> large energy threshold
     call newcregen(env,7,trim(atmp))
-    call rename(trim(atmp)//'.sorted',trim(atmp))
+    call rename_file(trim(atmp)//'.sorted',trim(atmp))
     write (stdout,'(a)') '> Sorted file was renamed to '//trim(atmp)
     write (stdout,*)
 
@@ -1287,7 +1287,7 @@ subroutine crest_new_tautomerize(env,tim)
     write (stdout,'(a)') '> Sorting structures by energy ...'
     env%ewin = env%protb%ewin*2.0_wp
     call newcregen(env,7,trim(atmp))
-    call rename(trim(atmp)//'.sorted',trim(atmp))
+    call rename_file(trim(atmp)//'.sorted',trim(atmp))
   end if
 
 !========================================================================================!
@@ -1300,7 +1300,7 @@ subroutine crest_new_tautomerize(env,tim)
 !========================================================================================!
 !========================================================================================!
 !>--- move final ensemble to deprotonated.xyz
-  call rename(trim(atmp),'tautomers.xyz')
+  call rename_file(trim(atmp),'tautomers.xyz')
   write (stdout,'(a)') '> Sorted file was renamed to tautomers.xyz'
 
   write (stdout,'(a)') '> All other temporary tautomerize_*.xyz files are removed by default.'

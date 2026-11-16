@@ -430,7 +430,7 @@ subroutine cross2(env)
       !--- stay in dir OPTIM
       call rmrfw('TMPCONF')
       call checkname_xyz(crefile,inpnam,outnam)
-      call rename('opt.xyz',trim(inpnam))
+      call rename_file('opt.xyz',trim(inpnam))
       env%ewin = aint(ewinbackup*(10.0d0/6.0d0))
       call confg_chk3(env)
       call checkname_xyz(crefile,inpnam,outnam)
@@ -443,7 +443,7 @@ subroutine cross2(env)
       else
         call MDopt_para(env,inpnam,0) !<--- creates another dir OPTIM within the current dir OPTIM
       end if
-      call rename('OPTIM'//'/'//'opt.xyz','opt.xyz') !move the optimized GC ensemble into current direcotry
+      call rename_file('OPTIM'//'/'//'opt.xyz','opt.xyz') !move the optimized GC ensemble into current direcotry
     end if
 
     !--- exit dir OPTIM and get file

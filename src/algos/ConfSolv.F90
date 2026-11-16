@@ -97,7 +97,7 @@ contains  !> MODULE PROCEDURES START HERE
     io = 0
     if (cs_teardown.and.allocated(cs_pid).and.allocated(cs_port)) then
       write (stdout,'(/,a,i0)') 'Shutting down http://localhost/',cs_port
-      call kill(cs_pid,9,io)
+      call kill_process(cs_pid,io)
       deallocate (cs_pid)
       call cs_shutdown2(io)
     end if
@@ -122,7 +122,7 @@ contains  !> MODULE PROCEDURES START HERE
       read(str,*,iostat=ro) str2,pids
       if(ro == 0)then
       !   write(*,*) pids
-         call kill(pids,9,io) 
+         call kill_process(pids,io) 
       endif
     enddo
     close(ich)

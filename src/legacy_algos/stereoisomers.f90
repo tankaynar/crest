@@ -1051,7 +1051,7 @@ subroutine optstruc(nat,at,xyz)
       jobcall = 'xtb coord --gff --opt loose --input constraints > xtb.out 2>> xtb.out'
       call command(trim(jobcall), io)
 
-      call rename('xtbopt.coord','coord')
+      call rename_file('xtbopt.coord','coord')
       jobcall='xtb coord --gff --opt loose >> xtb.out 2>> xtb.out'
       call command(trim(jobcall), io)
 

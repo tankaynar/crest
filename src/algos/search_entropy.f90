@@ -144,10 +144,10 @@ subroutine crest_search_entropy(env,tim)
 !>--- save the CRE under a backup name
       call checkname_xyz(crefile,atmp,str)
       call checkname_xyz('.cre',str,btmp)
-      call rename(atmp,btmp)
+      call rename_file(atmp,btmp)
 !>--- save cregen output
       call checkname_tmp('cregen',atmp,btmp)
-      call rename('cregen.out.tmp',btmp)
+      call rename_file('cregen.out.tmp',btmp)
 
 !=========================================================!
 !>--- cleanup after first iteration and prepare next
@@ -334,7 +334,7 @@ subroutine crest_smtd_mds(env,ensnam)
   write (*,'(1x,a,/)') 'done.'
   env%mtdstaticfile = "crest_bias.xyz"
   env%nstatic = TOTAL
-  call rename(clusterfile,env%mtdstaticfile)
+  call rename_file(clusterfile,env%mtdstaticfile)
 
   !>--- then, get the input structures
   env%nclust = env%emtd%nMDs  !> this determines how many clusters will be build
@@ -371,7 +371,7 @@ subroutine crest_smtd_mds(env,ensnam)
 !>--- output will be collected in crest_dynamics.trj
 !>--- but the entropy routines look for the crest_rotamers_ files
   call checkname_xyz(crefile,atmp,btmp)
-  call rename('crest_dynamics.trj',atmp)
+  call rename_file('crest_dynamics.trj',atmp)
 !===================================================================!
 !>--- by default, clean up the directory
   if (.not.env%keepModef) call cleanMTD

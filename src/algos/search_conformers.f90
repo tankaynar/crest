@@ -138,10 +138,10 @@ subroutine crest_search_imtdgc(env,tim)
 !>--- save the CRE under a backup name
     call checkname_xyz(crefile,atmp,str)
     call checkname_xyz('.cre',str,btmp)
-    call rename(atmp,btmp)
+    call rename_file(atmp,btmp)
 !>--- save cregen output
     call checkname_tmp('cregen',atmp,btmp)
-    call rename('cregen.out.tmp',btmp)
+    call rename_file('cregen.out.tmp',btmp)
 
 !=========================================================!
 !>--- cleanup after first iteration and prepare next
@@ -200,7 +200,7 @@ subroutine crest_search_imtdgc(env,tim)
     if (lower) then
       call checkname_xyz(crefile,atmp,str)
       call checkname_xyz('.cre',str,btmp)
-      call rename(atmp,btmp)
+      call rename_file(atmp,btmp)
       cycle MAINLOOP
     end if
   end if
@@ -216,7 +216,7 @@ subroutine crest_search_imtdgc(env,tim)
       if (lower) then
         call checkname_xyz(crefile,atmp,str)
         call checkname_xyz('.cre',str,btmp)
-        call rename(atmp,btmp)
+        call rename_file(atmp,btmp)
         if (env%iterativeV2) cycle MAINLOOP
       end if
     end if
@@ -385,7 +385,7 @@ subroutine crest_multilevel_oloop(env,ensnam,multilevel_in)
        deallocate(eread,at,xyz)
      !>--- rename ensemble and sort
        call checkname_xyz(crefile,inpnam,outnam)
-       call rename(ensemblefile,trim(inpnam))
+       call rename_file(ensemblefile,trim(inpnam))
      !>--- check for empty ensemble content
        call rdensembleparam(trim(inpnam),nat,nall)
        if (nall .lt. 1) then

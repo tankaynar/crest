@@ -336,7 +336,7 @@ subroutine ohess(env)
       call remove("g98_locmode.out")
       call remove("g98.out")
 
-      call rename('xtbopt.coord','coord')
+      call rename_file('xtbopt.coord','coord')
       call ConstrainsToSET('coord',.false.,env%constraints)
       if(env%gbsa) then  ! makes charges for qmdff
          jobcall=''
@@ -434,7 +434,7 @@ subroutine confg_chk(env,m,better)
       if(better) then
          write(*,*) 'LOWER ENERGY STRUCTURE FOUND AND RESET'
          call getcregenwarning(trim(fname))
-         call rename('scoord.1','coord')
+         call rename_file('scoord.1','coord')
          call ConstrainsToSET('coord',.false.,env%constraints)
          call appendto('crest_best.xyz','.history.xyz')
          call remove('LOWER_FOUND')

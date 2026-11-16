@@ -49,7 +49,7 @@ subroutine addorigin(filename,origin)
   call wrensemble('dummy',nat,nall,at,xyz,er,comments)
 
   call remove(filename)
-  call rename('dummy',filename)
+  call rename_file('dummy',filename)
 
   return
 end subroutine addorigin
@@ -88,7 +88,7 @@ subroutine addorigin2(filename,origin,nall)
   close (from)
   close (to)
   call remove(filename)
-  call rename('dummy',filename)
+  call rename_file('dummy',filename)
 
 end subroutine addorigin2
 
@@ -153,7 +153,7 @@ subroutine addoriginXYZ(filename,origin)
   close (from)
   close (to)
   call remove(filename)
-  call rename('dummy',filename)
+  call rename_file('dummy',filename)
 
 end subroutine addoriginXYZ
 

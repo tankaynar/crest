@@ -103,7 +103,7 @@ subroutine setdg_subr_real(fnam,dg,tmp2)
       close(ich,status='delete')
       close(och)
 
-      call rename('.setdgtmp',trim(fnam))
+      call rename_file('.setdgtmp',trim(fnam))
 
 end subroutine setdg_subr_real
 
@@ -172,7 +172,7 @@ subroutine setdg_subr_int(fnam,dg,tmp2)
       close(ich,status='delete')
       close(och)
 
-      call rename('.setdgtmp',trim(fnam))
+      call rename_file('.setdgtmp',trim(fnam))
 
 end subroutine setdg_subr_int
 
@@ -241,7 +241,7 @@ subroutine setdg_subr_string(fnam,dg,tmp2)
       close(ich,status='delete')
       close(och)
 
-      call rename('.setdgtmp',trim(fnam))
+      call rename_file('.setdgtmp',trim(fnam))
 
 end subroutine setdg_subr_string
  
@@ -293,7 +293,7 @@ subroutine setdg_constr(fnam,dg,tmp2)
       close(ich,status='delete')
       close(och)
 
-      call rename('.setdgtmp',trim(fnam))
+      call rename_file('.setdgtmp',trim(fnam))
 
 end subroutine setdg_constr
 
@@ -363,7 +363,7 @@ subroutine setdg_subr_metadyn(fnam,dg,tmp2,tmp3,tmp4)
       close(ich,status='delete')
       close(och)
 
-      call rename('.setdgtmp',trim(fnam))
+      call rename_file('.setdgtmp',trim(fnam))
 
 end subroutine setdg_subr_metadyn
 
@@ -430,7 +430,7 @@ subroutine setdg_optlev(fnam,optlev)
       close(ich,status='delete')
       close(och)
 
-      call rename('.setdgtmp',trim(fnam))
+      call rename_file('.setdgtmp',trim(fnam))
 
 end subroutine setdg_optlev
 
@@ -478,7 +478,7 @@ subroutine setdg_block_plain(fnam,dg)
       close(ich,status='delete')
       close(och)
 
-      call rename('.setdgtmp',trim(fnam))
+      call rename_file('.setdgtmp',trim(fnam))
 
 end subroutine setdg_block_plain
 
@@ -539,7 +539,7 @@ subroutine setdg_block_key(fnam,key,dg)
       close(ich,status='delete')
       close(och)
 
-      call rename('.setdgtmp',trim(fnam))
+      call rename_file('.setdgtmp',trim(fnam))
 
 end subroutine setdg_block_key
 
@@ -587,7 +587,7 @@ subroutine clear_end(fnam)
       close(ich,status='delete')
       close(och)
 
-      call rename('.setdgtmp',trim(fnam))
+      call rename_file('.setdgtmp',trim(fnam))
 
 end subroutine clear_end
 

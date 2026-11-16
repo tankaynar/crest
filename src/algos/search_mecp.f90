@@ -108,7 +108,7 @@ subroutine crest_search_mecp(env,tim)
 
 !==========================================================!
 !>--- rename ensemble and sort
-  call rename(ensemblefile,mecpensemble)
+  call rename_file(ensemblefile,mecpensemble)
   call newcregen(env,12)
 
 !==========================================================!

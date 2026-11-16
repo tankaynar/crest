@@ -48,7 +48,7 @@ subroutine normalMD(fname,env,nr,newtemp,newtime)
   call rmrf(tmppath)            !clear old directory
   r = makedir(trim(tmppath))    !make new directory
 
-  call rename(trim(fname),trim(tmppath)//'/'//'coord')
+  call rename_file(trim(fname),trim(tmppath)//'/'//'coord')
   call env%wrtCHRG(trim(tmppath))
   call copysub(env%fixfile,trim(tmppath))
   if (env%useqmdff) then
@@ -310,7 +310,7 @@ subroutine setstaticmtd(infile,k,alpha,ramp,nset,statfile,atomlist)
   close (ich)
   close (ich2)
 
-  call rename('tmpcoordfile',trim(infile))
+  call rename_file('tmpcoordfile',trim(infile))
 
   return
 end subroutine setstaticmtd
@@ -359,7 +359,7 @@ subroutine entropyMD_para_OMP(env)
     write (*,'(1x,a,/)') 'done.'
     env%mtdstaticfile = "crest_bias.xyz"
     env%nstatic = TOTAL
-    call rename(clusterfile,env%mtdstaticfile)
+    call rename_file(clusterfile,env%mtdstaticfile)
 
     !--- then get the input structures
     env%nclust = env%emtd%nMDs
@@ -518,7 +518,7 @@ subroutine entropyMD(fname,env,nr,newtemp,newtime,k,alpha)
   call rmrf(tmppath)            !clear old directory
   r = makedir(trim(tmppath))    !make new directory
 
-  call rename(trim(fname),trim(tmppath)//'/'//'coord')
+  call rename_file(trim(fname),trim(tmppath)//'/'//'coord')
   call env%wrtCHRG(trim(tmppath))
   call copysub(env%fixfile,trim(tmppath))
   if (env%gfnver == '--gff') then

@@ -418,7 +418,7 @@ contains  !> MODULE PROCEDURES START HERE
     end do
     close (ich,status='delete')
     close (ich2)
-    call rename('.setdgtmp',fname)
+    call rename_file('.setdgtmp',fname)
   end subroutine clear_setblock
 
 !========================================================================================!
