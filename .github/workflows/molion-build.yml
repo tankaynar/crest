@@ -1,0 +1,233 @@
+# Builds this branch's CREST for Molion on macOS arm64, Linux x64 and Windows x64, each into one
+# folder that runs on its own (crest/{bin,lib,licenses}), and publishes them as the assets of a
+# release, with the source they were built from.
+#
+# The libraries tblite fetches at configure time are pinned (molion/deps.txt) and handed to
+# FetchContent, so nothing is fetched then. macOS and Linux use conda-forge's gfortran and
+# OpenBLAS (Linux: glibc 2.17 or newer); Windows uses MSYS2's UCRT64 gfortran, with each DLL it
+# loads beside crest.exe. Each bundle is checked on its own (molion/check.sh): a butane
+# conformer search on one and two threads, as Molion runs it, with and without an input file.
+#
+# A push of a tag `molion-*` builds and makes that tag's release; a push to the branch only
+# builds.
+name: Molion build
+
+on:
+  push:
+    branches: [molion]
+    tags: ['molion-*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # An input file that names no structure: Molion's Windows builds once passed one, and
+  # v3.0.2 died on it (allocating gigabytes for a structure it had not read yet)
+  UNNAMED_INPUT: omp_nested = false
+
+jobs:
+  unix:
+    name: ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: osx-arm64
+            tools: llvm-openmp
+          # The oldest supported image, for the oldest glibc
+          - os: ubuntu-22.04
+            platform: linux-x64
+            # conda-forge's compilers link against glibc 2.34 otherwise
+            tools: patchelf sysroot_linux-64=2.17
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: build
+          create-args: >-
+            -c conda-forge --override-channels
+            fortran-compiler c-compiler cmake ninja git
+            libblas=*=*openblas liblapack openblas ${{ matrix.tools }}
+          init-shell: bash
+
+      - name: Fetch pinned dependencies
+        run: bash molion/fetch-deps.sh
+
+      # Each project's finders read <project>-dependency-method: only sources, never a package
+      # the environment might hold. C as gnu17, since GCC 15 defaults to C23.
+      - name: Build
+        shell: bash -el {0}
+        run: |
+          deps="$PWD/deps"
+          openblas="$CONDA_PREFIX/lib/libopenblas.$([ "$RUNNER_OS" = macOS ] && echo dylib || echo so)"
+          sources=""
+          for project in crest tblite lwoniom gfnff gfn0 toml-f mctc-lib dftd4 multicharge s-dftd3 mstore; do
+            sources="$sources -D$project-dependency-method=subproject;fetch"
+          done
+          cmake -B _build -G Ninja -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF \
+            -DBLAS_LIBRARIES="$openblas" -DLAPACK_LIBRARIES="$openblas" \
+            -DCMAKE_C_FLAGS=-std=gnu17 $sources \
+            -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
+            -DFETCHCONTENT_SOURCE_DIR_TEST-DRIVE="$PWD/subprojects/test-drive" \
+            -DFETCHCONTENT_SOURCE_DIR_MCTC-LIB="$deps/mctc-lib" \
+            -DFETCHCONTENT_SOURCE_DIR_DFTD4="$deps/dftd4" \
+            -DFETCHCONTENT_SOURCE_DIR_MULTICHARGE="$deps/multicharge" \
+            -DFETCHCONTENT_SOURCE_DIR_S-DFTD3="$deps/s-dftd3" \
+            -DFETCHCONTENT_SOURCE_DIR_MSTORE="$deps/mstore"
+          cmake --build _build --parallel --target crest-exe
+
+      - name: Bundle
+        shell: bash -el {0}
+        run: |
+          python molion/bundle.py --program _build/crest --prefix "$CONDA_PREFIX" --out dist
+          bash molion/licences.sh dist/crest/licenses/source
+          git rev-parse HEAD > dist/crest/COMMIT.txt
+
+      - name: Runs from the bundle alone
+        run: env -i HOME="$HOME" PATH=/usr/bin:/bin bash molion/check.sh "$PWD/dist/crest/bin/crest"
+
+      - name: Runs with an input file that names no structure
+        run: env -i HOME="$HOME" PATH=/usr/bin:/bin CHECK_INPUT="$UNNAMED_INPUT" bash molion/check.sh "$PWD/dist/crest/bin/crest"
+
+      - name: Package
+        run: |
+          (cd dist && zip -r -9 -y ../crest-${{ matrix.platform }}.zip crest)
+          shasum -a 256 crest-${{ matrix.platform }}.zip | tee crest-${{ matrix.platform }}.zip.sha256
+          if [ "$RUNNER_OS" = Linux ]; then
+            needed=$(objdump -T dist/crest/bin/crest dist/crest/lib/* | grep -oE 'GLIBC_[0-9.]+' | sort -Vu | tail -1)
+            echo "glibc needed: $needed"
+            # Molion's Linux package runs on glibc 2.17 or newer
+            test "$(printf '%s\nGLIBC_2.17\n' "$needed" | sort -V | tail -1)" = GLIBC_2.17
+          fi
+          du -sh dist/crest crest-${{ matrix.platform }}.zip
+
+      # The source of the release: this tree with its submodules and the pinned libraries
+      - name: Source
+        if: matrix.platform == 'linux-x64'
+        run: |
+          tar --exclude=.git --exclude=_build --exclude=dist --exclude='*.zip' \
+            --transform 's,^\.,crest-source,' -cJf crest-source.tar.xz .
+          shasum -a 256 crest-source.tar.xz | tee crest-source.tar.xz.sha256
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: crest-${{ matrix.platform }}
+          retention-days: 3
+          path: |
+            crest-*.zip
+            crest-*.sha256
+            crest-source.tar.xz
+          if-no-files-found: ignore
+
+  windows:
+    name: win-x64
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      # The runner's git would turn LF into CRLF on checkout
+      - name: Keep LF line endings
+        shell: pwsh
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: false
+          install: >-
+            git zip
+            mingw-w64-ucrt-x86_64-gcc-fortran
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-openblas
+
+      - name: Fetch pinned dependencies
+        run: bash molion/fetch-deps.sh
+
+      # _WIN32 reaches the Fortran preprocessor (the Windows code paths); the main thread gets a
+      # 16 MB stack instead of Windows's 1 MB, as Molion's xtb does
+      - name: Build
+        run: |
+          deps="$(cygpath -m "$PWD/deps")"
+          cmake -B _build -G Ninja -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF \
+            -DCMAKE_C_FLAGS=-std=gnu17 -DCMAKE_Fortran_FLAGS=-D_WIN32 \
+            -DCMAKE_EXE_LINKER_FLAGS=-Wl,--stack=16777216 \
+            -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
+            -DFETCHCONTENT_SOURCE_DIR_MCTC-LIB="$deps/mctc-lib" \
+            -DFETCHCONTENT_SOURCE_DIR_DFTD4="$deps/dftd4" \
+            -DFETCHCONTENT_SOURCE_DIR_MULTICHARGE="$deps/multicharge" \
+            -DFETCHCONTENT_SOURCE_DIR_S-DFTD3="$deps/s-dftd3" \
+            -DFETCHCONTENT_SOURCE_DIR_MSTORE="$deps/mstore"
+          cmake --build _build --parallel --target crest-exe
+
+      # Windows looks beside a program first, so its DLLs go in bin/, and each one's MSYS2
+      # package's licence files go in licenses/
+      - name: Bundle
+        run: |
+          mkdir -p dist/crest/bin
+          cp _build/crest.exe dist/crest/bin/
+          dlls=$(ldd dist/crest/bin/crest.exe | awk '/ucrt64/ {print $3}' | sort -u)
+          [ -n "$dlls" ] || { echo 'no UCRT64 DLLs found'; exit 1; }
+          for dll in $dlls; do
+            cp "$dll" dist/crest/bin/
+            package=$(pacman -Qqo "$dll")
+            mkdir -p "dist/crest/licenses/$package"
+            pacman -Qlq "$package" | grep -E '/share/licenses/.+[^/]$' | xargs -r -I{} cp {} "dist/crest/licenses/$package/"
+          done
+          ls dist/crest/bin dist/crest/licenses
+          bash molion/licences.sh dist/crest/licenses/source
+          git rev-parse HEAD > dist/crest/COMMIT.txt
+
+      # Only Windows's own folders on PATH, so a DLL left behind fails here
+      - name: Runs from the bundle alone
+        run: PATH=/usr/bin:/c/Windows/System32:/c/Windows bash molion/check.sh "$PWD/dist/crest/bin/crest.exe"
+
+      - name: Runs with an input file that names no structure
+        run: PATH=/usr/bin:/c/Windows/System32:/c/Windows CHECK_INPUT="$UNNAMED_INPUT" bash molion/check.sh "$PWD/dist/crest/bin/crest.exe"
+
+      - name: Package
+        run: |
+          (cd dist && zip -r -9 ../crest-win-x64.zip crest)
+          sha256sum crest-win-x64.zip | tee crest-win-x64.zip.sha256
+          du -sh dist/crest crest-win-x64.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: crest-win-x64
+          retention-days: 3
+          path: |
+            crest-*.zip
+            crest-*.sha256
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/molion-')
+    needs: [unix, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -l
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" \
+            --notes "CREST built for Molion from commit $GITHUB_SHA of the molion branch; see molion/README.md on this tag. crest-source.tar.xz is the source of every build here, its submodules and pinned libraries included." \
+            crest-*.zip crest-*.sha256 crest-source.tar.xz

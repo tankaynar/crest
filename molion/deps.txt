@@ -1,0 +1,9 @@
+# Libraries tblite fetches at configure time with no tag (today's HEAD: not repeatable, and it
+# has broken the configure). The build clones each at the revision tblite's own meson wraps
+# name into deps/<name> and hands it to CMake's FetchContent, so nothing is fetched then.
+# name url tag
+mctc-lib https://github.com/grimme-lab/mctc-lib v0.3.1
+dftd4 https://github.com/dftd4/dftd4 v3.4.0
+multicharge https://github.com/grimme-lab/multicharge v0.2.0
+s-dftd3 https://github.com/dftd3/simple-dftd3 v0.7.0
+mstore https://github.com/grimme-lab/mstore v0.3.0

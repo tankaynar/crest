@@ -10,3 +10,8 @@ _build*
 _dist*
 src/crest
 bin/
+
+# molion/ builds
+/deps/
+/_build/
+/dist/
