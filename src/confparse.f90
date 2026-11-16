@@ -61,6 +61,7 @@ subroutine parseflags(env,arg,nra)
   integer :: ctype
   logical :: ex,bondconst
   character(len=:),allocatable :: argument
+  type(coord) :: mol
 
   allocate (xx(10),floats(3),strings(3))
   ctmp = ''
@@ -333,6 +334,21 @@ subroutine parseflags(env,arg,nra)
   do i = 1,nra
     argument = trim(arg(i))
     if (argument == '--input'.or.argument == '-i') then
+      !> The coordinates named first on the command line ("crest struc.xyz --input x.toml")
+      !> are the input unless the file names others: load them before the file is read, since
+      !> its blocks (calculation, constraints, dynamics) need the structure. Without this the
+      !> reference structure was read uninitialised, and CREST died allocating gigabytes.
+      if (nra > 0) then
+        atmp = trim(arg(1))
+        if (atmp(1:1) .ne. '-'.and.index(atmp,'.toml') == 0) then
+          inquire (file=trim(atmp),exist=ex)
+          if (ex) then
+            env%inputcoords = trim(atmp)
+            call mol%open(trim(atmp))
+            call env%ref%load(mol)
+          end if
+        end if
+      end if
       call parseinputfile(env,trim(arg(i+1)))
       exit
     end if

@@ -287,7 +287,7 @@ module crest_data
 !******************************************
 !* separate storage of REFERENCE STRUCTURE
 !******************************************
-    integer :: nat
+    integer :: nat = 0
     integer,allocatable :: at(:)
     real(wp),allocatable :: xyz(:,:)
     integer :: ichrg = 0

@@ -87,8 +87,11 @@ contains !> MODULE PROCEDURES START HERE
 
     included = .false.
     call calc%reset()
-    call env%ref%to(moltmp)
-    call axis(moltmp%nat,moltmp%at,moltmp%xyz)
+    !> No structure yet (none named on the command line or in the file): nothing to orient
+    if (env%ref%nat > 0) then
+      call env%ref%to(moltmp)
+      call axis(moltmp%nat,moltmp%at,moltmp%xyz)
+    end if
 
     do i = 1,dict%nblk
       call blk%deallocate()
