@@ -112,8 +112,10 @@ jobs:
       - name: Source
         if: matrix.platform == 'linux-x64'
         run: |
+          # Written outside the tree it archives, then moved in
           tar --exclude=.git --exclude=_build --exclude=dist --exclude='*.zip' \
-            --transform 's,^\.,crest-source,' -cJf crest-source.tar.xz .
+            --transform 's,^\.,crest-source,' -cJf "$RUNNER_TEMP/crest-source.tar.xz" .
+          mv "$RUNNER_TEMP/crest-source.tar.xz" .
           shasum -a 256 crest-source.tar.xz | tee crest-source.tar.xz.sha256
 
       - uses: actions/upload-artifact@v4
